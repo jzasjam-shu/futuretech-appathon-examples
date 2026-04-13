@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Comment Spam Detection (TensorFlow.js)</title>
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<h1>Comment Spam Detection</h1>
+
+<div class="panel">
+
+    <!-- LEFT: COMMENTS -->
+    <div class="col">
+
+        <h3>Write a Comment</h3>
+        <div id="comment" class="comment-box" contenteditable></div>
+        <button id="post">Post Comment</button>
+
+        <h3>Comments</h3>
+        <ul id="commentsList"></ul>
+
+    </div>
+
+    <!-- RIGHT: STATUS -->
+    <div class="col">
+
+        <div id="status">Model loading...</div>
+
+        <strong>How does it work?</strong>
+        <p>
+            This demo detects whether a comment is spam using a trained model.
+        </p>
+        <p>
+            Enter a comment and click "Post Comment" to see if it's classified as spam or not. The model is trained on a dataset of YouTube comments, and it identifies common patterns in spam comments, such as excessive use of certain words, links, or phrases.
+        </p>
+        
+        <strong>Example Spam Comments:</strong>
+        <ul>
+            <li>check out my channel and subscribe for free money now!!!</li>
+            <li>visit http://bit.ly/freecash now free free free!!!</li>
+            <li>subscribe to my channel please please please!!!</li>
+            <li>check out my channel and get free money now!!!</li>
+            <li>visit my channel and subscribe now for free!!!</li>
+            <li>subscribe subscribe subscribe to my channel!!!</li>
+            <li>click here now and get free money http link now!!!</li>
+            <li>check this out http link free money now!!!</li>
+            <li>subscribe to my channel and like and subscribe!!!</li>
+            <li>check out my channel please subscribe now!!!</li>
+            <li>So XYZ stock just increased in value! Buy some right before it's too late!</li>
+        </ul>
+
+    </div>
+
+</div>
+
+<!-- TensorFlow -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script type="module" src="script.js"></script>
+
+</body>
+</html>

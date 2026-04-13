@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Object Detection</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <h1>Object Detection using COCO-SSD</h1>
+
+  <div class="panel">
+
+    <!-- LEFT: Camera -->
+    <div class="col">
+      <div class="camView">
+        <video id="video" autoplay muted width="640" height="480"></video>
+        <canvas id="canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- RIGHT: Controls -->
+    <div class="col">
+      <div id="status">Model loading...</div>
+
+      <button id="startBtn" disabled>Start Camera</button>
+
+      <h2>What happens?</h2>
+      <p>This model detects objects in real time using a pre-trained model.</p>
+      <p>No training needed!</p>
+
+    </div>
+
+  </div>
+
+  <!-- TensorFlow -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.12.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hand Pose Classifier</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <h1>Hand Pose Classifier using MediaPipe</h1>
+
+    <div class="panel">
+
+        <!-- LEFT: Camera -->
+        <div class="col">
+            <div class="camView">
+                <video id="video" autoplay muted width="640" height="480"></video>
+                <canvas id="canvas"></canvas>
+            </div>
+        </div>
+
+        <!-- RIGHT: Controls -->
+        <div class="col">
+            <div id="status">Model loading...</div>
+
+            <button id="startBtn" disabled>Start Camera</button>
+
+            <h2>Save Examples</h2>
+            <p>Hold button to collect samples</p>
+
+            <button data-label="rock" class="sampleBtn" disabled>Add Rock (0)</button>
+            <button data-label="paper" class="sampleBtn" disabled>Add Paper (0)</button>
+            <button data-label="scissors" class="sampleBtn" disabled>Add Scissors (0)</button>
+
+            <h2>Train / Save / Load</h2>
+            <button id="trainBtn" disabled>Train & Predict</button>
+            <button id="saveBtn" disabled>Save</button>
+            <button id="loadBtn" disabled>Load</button>
+            <button id="resetBtn">Reset</button>
+        </div>
+
+    </div>
+
+    <!-- TensorFlow -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.12.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
