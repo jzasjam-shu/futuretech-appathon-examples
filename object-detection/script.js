@@ -1,18 +1,27 @@
-// Variables for HTML elements
+// ===============================
+// Elements
+// ===============================
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const statusText = document.getElementById("status");
 const startBtn = document.getElementById("startBtn");
 
+// ===============================
+// Variables
+// ===============================
 let model; // Object Detection Model
 
-// Status helper
+// ===============================
+// Status helper (sets status message)
+// ===============================
 function setStatus(message) {
     statusText.innerHTML = `<div class="new">${message}</div>`;
 }
 
-// Init / Load model
+// ===============================
+// Init / Load the model
+// ===============================
 async function init() {
 
     // Set backend (use webgl to speed up processing)
@@ -25,11 +34,15 @@ async function init() {
     setStatus("Model loaded!");
     startBtn.disabled = false;
 }
+// Call init function
 init();
 
-
-// Start camera when #startBtn is clicked
-startBtn.onclick = async () => {
+// ===============================
+// Start the camera (when startBtn is clicked)
+// ===============================
+startBtn.onclick = startCamera;
+// Function to start the camera
+async function startCamera() {
     // Get camera stream
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     video.srcObject = stream;
@@ -49,7 +62,9 @@ startBtn.onclick = async () => {
     };
 };
 
-
+// ===============================
+// Predict (make predictions and display the result)
+// ===============================
 //  Function to draw predictions on canvas
 async function drawPredictions(predictions) {
 

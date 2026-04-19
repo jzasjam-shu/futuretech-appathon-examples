@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Linear Regression: Predict Car Fuel Efficiency</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>Linear Regression: Predict Car Fuel Efficiency</h1>
+
+<div class="panel">
+
+    <!-- LEFT PANEL -->
+    <div class="col">
+
+        <h2>Dataset Preview</h2>
+        <div id="dataPreview">No data loaded</div>
+
+        <h2>Make a Prediction</h2>
+
+        <label>Horsepower:</label>
+        <input type="number" id="hpInput" value="130">
+        <br>
+
+        <label>Weight:</label>
+        <input type="number" id="weightInput" value="3500">
+        <br>
+
+        <label>Cylinders:</label>
+        <input type="number" id="cylInput" value="8">
+
+        <br>
+        <button id="predictBtn" disabled>Predict MPG</button>
+
+        <div id="predictionOutput"></div>
+
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="col">
+
+        <div id="status">Loading...</div>
+
+        <h2>Controls</h2>
+
+        <button id="trainBtn" disabled>Train Model</button>
+        <button id="saveBtn" disabled>Save Model</button>
+        <button id="loadBtn" disabled>Load Model</button>
+        <button id="resetBtn">Reset</button>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="script.js"></script>
+
+</body>
+</html>

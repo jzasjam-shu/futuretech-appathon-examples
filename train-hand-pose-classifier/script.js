@@ -1,19 +1,33 @@
-// Variables for HTML elements
+// ===============================
+// Elements
+// ===============================
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const statusText = document.getElementById("status");
 const startBtn = document.getElementById("startBtn");
 
+const trainBtn = document.getElementById("trainBtn");
+const saveBtn = document.getElementById("saveBtn");
+const loadBtn = document.getElementById("loadBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+// ===============================
+// Variables
+// ===============================
 let detector;        // Hand detector
 let lastHand = null; // Last detected hand
 
-// Status helper
+// ===============================
+// Status helper (sets status message)
+// ===============================
 function setStatus(message) {
     statusText.innerHTML = `<div class="new">${message}</div>`;
 }
 
-// Init / Load model
+// ===============================
+// Init / Load the model
+// ===============================
 async function init() {
 
     // Set backend (use webgl to speed up processing)
@@ -41,8 +55,12 @@ async function init() {
 // Call init function
 init();
 
-// Start camera when #startBtn is clicked
-startBtn.onclick = async () => {
+// ===============================
+// Start the camera (when startBtn is clicked)
+// ===============================
+startBtn.onclick = startCamera;
+// Function to start the camera
+async function startCamera() {
     // Get camera stream
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     video.srcObject = stream;
@@ -65,12 +83,17 @@ startBtn.onclick = async () => {
     });
 };
 
-// Training variables
+// ===============================
+//  Variables for training
+// ===============================
 let trainingData = [];
 let labels = [];
 let labelMap = [];
 let model;
 
+// ===============================
+// Data Preprocessing
+// ===============================
 // Convert keypoints to array
 function keypointsToArray(keypoints) {
     // Use wrist as reference point
@@ -81,10 +104,12 @@ function keypointsToArray(keypoints) {
     ]);
 }
 
+// ===============================
 // Add samples for training when a button with .sampleBtn is held down
+// ===============================
 document.querySelectorAll(".sampleBtn").forEach(btn => {
     btn.onmousedown = () => {
-        // Capture a sample ever 100ms
+        // Capture a sample every 100ms
         btn.interval = setInterval(() => addSample(btn.dataset.label), 100);
     };
     // Stop capture samples when mouse is released
@@ -113,7 +138,9 @@ function updateCounts() {
     });
 }
 
-// Train Model when the #trainBtn button is clicked
+// ===============================
+// Train Model (when the #trainBtn button is clicked)
+// ===============================
 document.getElementById("trainBtn").onclick = trainModel;
 // Function to train the model
 async function trainModel() {
@@ -152,7 +179,9 @@ async function trainModel() {
     ys.dispose();
 }
 
-
+// ===============================
+// Predict (make predictions and display the result)
+// ===============================
 // Function to predict the class of a hand pose
 function predictClass(keypoints) {
      // Check if the model is loaded
@@ -233,27 +262,47 @@ async function runLoop() {
     requestAnimationFrame(runLoop);
 }
 
+// ===============================
+// Save Model (when saveBtn is clicked)
+// ===============================
+saveBtn.onclick = saveModel;
 
-// Save model to local storage
-document.getElementById("saveBtn").onclick = saveModel;
+// Function to save model to the browser's local storage
 async function saveModel() {
+    // Save the model in local storage
     await model.save("localstorage://hand-model");
+
+    // Save the label map in local storage
     localStorage.setItem("hand-labels", JSON.stringify(labelMap));
+
+    // Set status message and enable the load button
     setStatus("Model saved!");
-    // Enable the load button
-    document.getElementById("loadBtn").disabled = false;
+    loadBtn.disabled = false;
 }
 
-// Load model from local storage
-document.getElementById("loadBtn").onclick = loadModel;
+// ===============================
+// Load Model (when loadModelBtn is clicked)
+// ===============================
+loadBtn.onclick = loadModel;
+
+// Function to load model from browser's local storage
 async function loadModel() {
+    // Load the model from local storage
     model = await tf.loadLayersModel("localstorage://hand-model");
+
+    // Load the label map from local storage
     labelMap = JSON.parse(localStorage.getItem("hand-labels")) || [];
+
+    // Set status message
     setStatus("Model loaded!");
 }
 
-// Reset the model and UI
-document.getElementById("resetBtn").onclick = resetModel;
+// ===============================
+// Reset the model and UI (when resetBtn is clicked)
+// ===============================
+resetBtn.onclick = resetModel;
+
+// Function to reset the model and UI
 async function resetModel() {
     // Reset the model data and labels
     model = null;
@@ -261,10 +310,10 @@ async function resetModel() {
     trainingData = [];
     labels = [];
     // Remove model from local storage if one exists
-    if(localStorage.getItem("hand-labels")) {
+    try {
         await tf.io.removeModel("localstorage://hand-model");
         localStorage.removeItem("hand-labels");
-    }
+    } catch (e) {}
     // Reset the UI and buttons
     document.getElementById("saveBtn").disabled = true;
     document.getElementById("loadBtn").disabled = true;

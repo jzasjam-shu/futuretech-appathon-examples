@@ -1,19 +1,33 @@
-// Variables for HTML elements
+// ===============================
+// Elements
+// ===============================
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const statusText = document.getElementById("status");
 const startBtn = document.getElementById("startBtn");
 
+const trainBtn = document.getElementById("trainBtn");
+const saveBtn = document.getElementById("saveBtn");
+const loadBtn = document.getElementById("loadBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+// ===============================
+// Variables
+// ===============================
 let mobilenet;  // Image feature extractor
 let model;      // Image classifier
 
-// Status helper
+// ===============================
+// Status helper (sets status message)
+// ===============================
 function setStatus(message) {
     statusText.innerHTML = `<div class="new">${message}</div>`;
 }
 
+// ===============================
 // Init / Load the model
+// ===============================
 async function init() {
 
     // Set backend (use webgl to speed up processing)
@@ -52,8 +66,12 @@ async function init() {
 init();
 
 
-// Start the camera when #startBtn is clicked
-startBtn.onclick = async () => {
+// ===============================
+// Start the camera (when startBtn is clicked)
+// ===============================
+startBtn.onclick = startCamera;
+// Function to start the camera
+async function startCamera() {
     // Get camera stream
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     video.srcObject = stream;
@@ -74,11 +92,17 @@ startBtn.onclick = async () => {
     });
 };
 
+
+// ===============================
 //  Variables for training
+// ===============================
 let trainingData = [];
 let labels = [];
 let labelMap = [];
 
+// ===============================
+// Data Preprocessing
+// ===============================
 // Function to extract features from the video frame
 function getFeatures() {
     return tf.tidy(() => {
@@ -89,7 +113,9 @@ function getFeatures() {
     });
 }
 
+// ===============================
 // Add samples for training when a button with .sampleBtn is held down
+// ===============================
 document.querySelectorAll(".sampleBtn").forEach(btn => {
     btn.onmousedown = () => {
         // Capture a sample every 100ms
@@ -121,8 +147,11 @@ function updateCounts() {
     });
 }
 
-// Train Model when the #trainBtn button is clicked
+// ===============================
+// Train Model (when the #trainBtn button is clicked)
+// ===============================
 document.getElementById("trainBtn").onclick = trainModel;
+
 // Function to train the model
 async function trainModel() {
     // Convert training data and labels to tensors
@@ -145,6 +174,9 @@ async function trainModel() {
     ys.dispose();
 }
 
+// ===============================
+// Predict (make predictions and display the result)
+// ===============================
 // Function to predict the class of an image
 function predictClass() {
     // Check if the model is loaded
@@ -215,26 +247,47 @@ async function runLoop() {
     requestAnimationFrame(runLoop);
 }
 
-// Save model to local storage
-document.getElementById("saveBtn").onclick = saveModel;
+// ===============================
+// Save Model (when saveBtn is clicked)
+// ===============================
+saveBtn.onclick = saveModel;
+
+// Function to save model to the browser's local storage
 async function saveModel() {
-    await model.save("localstorage://image-classifier");
+    // Save the model in local storage
+    await model.save("localstorage://image-classifier-model");
+
+    // Save the label map in local storage
     localStorage.setItem("image-classifier-labels", JSON.stringify(labelMap));
+
+    // Set status message and enable the load button
     setStatus("Model saved!");
-    // Enable the load button
-    document.getElementById("loadBtn").disabled = false;
+    loadBtn.disabled = false;
 }
 
-// Load model from local storage
-document.getElementById("loadBtn").onclick = loadModel;
+// ===============================
+// Load Model (when loadModelBtn is clicked)
+// ===============================
+loadBtn.onclick = loadModel;
+
+// Function to load model from browser's local storage
 async function loadModel() {
-    model = await tf.loadLayersModel("localstorage://image-classifier");
+    // Load the model from local storage
+    model = await tf.loadLayersModel("localstorage://image-classifier-model");
+
+    // Load the label map from local storage
     labelMap = JSON.parse(localStorage.getItem("image-classifier-labels")) || [];
+
+    // Set status message
     setStatus("Model loaded!");
 }
 
-// Reset the model and UI
-document.getElementById("resetBtn").onclick = resetModel;
+// ===============================
+// Reset the model and UI (when resetBtn is clicked)
+// ===============================
+resetBtn.onclick = resetModel;
+
+// Function to reset the model and UI
 async function resetModel() {
 
     // Reset the model data and labels
@@ -243,10 +296,10 @@ async function resetModel() {
     labels = [];
     labelMap = [];
     // Remove model from local storage if one exists
-    if(localStorage.getItem("image-classifier-labels")) {
-        await tf.io.removeModel("localstorage://image-classifier");   
+    try {
+        await tf.io.removeModel("localstorage://image-classifier-model");
         localStorage.removeItem("image-classifier-labels");
-    }
+    } catch (e) {}
     // Reset the UI and buttons
     document.getElementById("trainBtn").disabled = true;
     document.getElementById("saveBtn").disabled = true;

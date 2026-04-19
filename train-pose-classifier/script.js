@@ -1,19 +1,33 @@
-// Variables for HTML elements
+// ===============================
+// Elements
+// ===============================
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const statusText = document.getElementById("status");
 const startBtn = document.getElementById("startBtn");
 
+const trainBtn = document.getElementById("trainBtn");
+const saveBtn = document.getElementById("saveBtn");
+const loadBtn = document.getElementById("loadBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+// ===============================
+// Variables
+// ===============================
 let detector;        // Pose detector
 let lastPose = null; // Last detected pose
 
-// Status helper
+// ===============================
+// Status helper (sets status message)
+// ===============================
 function setStatus(message) {
     statusText.innerHTML = `<div class="new">${message}</div>`;
 }
 
+// ===============================
 // Init / Load the model
+// ===============================
 async function init() {
 
     // Set backend (use webgl to speed up processing)
@@ -31,20 +45,21 @@ async function init() {
 
     // Enable load button if saved model exists
     if (localStorage.getItem("pose-labels")) {
-        document.getElementById("loadBtn").disabled = false;
+        loadBtn.disabled = false;
     }
 }
 // Call init function
 init();
 
-
-// Start the camera when #startBtn is clicked
-startBtn.onclick = async () => {
+// ===============================
+// Start the camera (when startBtn is clicked)
+// ===============================
+startBtn.onclick = startCamera;
+// Function to start the camera
+async function startCamera() {
     // Get camera stream
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     video.srcObject = stream;
-    // Camera flipped/mirror
-    video.style.transform = "scaleX(-1)";
 
     // Wait for video metadata to load
     video.addEventListener("loadedmetadata", () => {
@@ -63,12 +78,17 @@ startBtn.onclick = async () => {
 };
 
 
+// ===============================
 //  Variables for training
+// ===============================
 let trainingData = [];
 let labels = [];
 let labelMap = [];
 let model;
 
+// ===============================
+// Data Preprocessing
+// ===============================
 // Convert keypoints to normalised array for training
 function keypointsToArray(keypoints) {
     return keypoints.flatMap(kp => [
@@ -77,10 +97,12 @@ function keypointsToArray(keypoints) {
     ]);
 }
 
+// ===============================
 // Add samples for training when a button with .sampleBtn is held down
+// ===============================
 document.querySelectorAll(".sampleBtn").forEach(btn => {
     btn.onmousedown = () => {
-        // Capture a sample ever 100ms
+        // Capture a sample every 100ms
         btn.interval = setInterval(() => addSample(btn.dataset.label), 100);
     };
     // Stop capture samples when mouse is released
@@ -97,10 +119,10 @@ function addSample(label) {
     setStatus(`Added: ${label}`);
     updateCounts();
     // Enable the train button
-    document.getElementById("trainBtn").disabled = false;
+    trainBtn.disabled = false;
 }
 
-// Update sample counts on the buttons
+// Function to update sample counts on the buttons
 function updateCounts() {
     document.querySelectorAll('button[data-label]').forEach(btn => {
         const label = btn.dataset.label;
@@ -109,9 +131,11 @@ function updateCounts() {
     });
 }
 
+// ===============================
+// Train Model (when the #trainBtn button is clicked)
+// ===============================
+trainBtn.onclick = trainModel;
 
-// Train Model when the #trainBtn button is clicked
-document.getElementById("trainBtn").onclick = trainModel;
 // Function to train the model
 async function trainModel() {
     // Convert training data and labels to tensors
@@ -142,13 +166,16 @@ async function trainModel() {
 
     // Set the status and enable the save button
     setStatus("Model trained!");
-    document.getElementById("saveBtn").disabled = false;
+    saveBtn.disabled = false;
 
     // Clean up tensors
     xs.dispose();
     ys.dispose();
 }
 
+// ===============================
+// Predict (make predictions and display the result)
+// ===============================
 // Function to predict the class of a pose
 function predictClass(keypoints) {
     // Check if the model is loaded
@@ -246,27 +273,47 @@ async function runLoop() {
     requestAnimationFrame(runLoop);
 }
 
+// ===============================
+// Save Model (when saveBtn is clicked)
+// ===============================
+saveBtn.onclick = saveModel;
 
-// Save model to local storage
-document.getElementById("saveBtn").onclick = saveModel;
+// Function to save model to the browser's local storage
 async function saveModel() {
+    // Save the model in local storage
     await model.save("localstorage://pose-model");
+
+    // Save the label map in local storage
     localStorage.setItem("pose-labels", JSON.stringify(labelMap));
+
+    // Set status message and enable the load button
     setStatus("Model saved!");
-    // Enable the load button
-    document.getElementById("loadBtn").disabled = false;
+    loadBtn.disabled = false;
 }
 
-// Load model from local storage
-document.getElementById("loadBtn").onclick = loadModel;
+// ===============================
+// Load Model (when loadModelBtn is clicked)
+// ===============================
+loadBtn.onclick = loadModel;
+
+// Function to load model from browser's local storage
 async function loadModel() {
+    // Load the model from local storage
     model = await tf.loadLayersModel("localstorage://pose-model");
+
+    // Load the label map from local storage
     labelMap = JSON.parse(localStorage.getItem("pose-labels")) || [];
+
+    // Set status message
     setStatus("Model loaded!");
 }
 
-// Reset the model and UI
-document.getElementById("resetBtn").onclick = resetModel;
+// ===============================
+// Reset the model and UI (when resetBtn is clicked)
+// ===============================
+resetBtn.onclick = resetModel;
+
+// Function to reset the model and UI
 async function resetModel() {
     // Reset the model data and labels
     model = null;
@@ -274,13 +321,13 @@ async function resetModel() {
     trainingData = [];
     labels = [];
     // Remove model from local storage if one exists
-    if(localStorage.getItem("pose-labels")) {
+    try {
         await tf.io.removeModel("localstorage://pose-model");
         localStorage.removeItem("pose-labels");
-    }
+    } catch (e) {}
     // Reset the UI and buttons
-    document.getElementById("saveBtn").disabled = true;
-    document.getElementById("loadBtn").disabled = true;
+    saveBtn.disabled = true;
+    loadBtn.disabled = true;
     updateCounts();
     // Set status message
     setStatus("Model reset!");
