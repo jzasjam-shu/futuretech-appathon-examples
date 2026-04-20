@@ -45,6 +45,8 @@ async function init() {
     setStatus("Audio model ready!");
     startBtn.disabled = false;
 
+    mode = "predict";
+
     // Enable load button if saved model exists
     if (localStorage.getItem("audio-labels")) {
         loadBtn.disabled = false;
@@ -79,7 +81,7 @@ async function startMicrophone() {
         // Prediction
         // ======================
         if (mode === "predict") {
-            
+
             // If no trained model, use the pretrained model
             if (!model) {
                 setStatus("Using pretrained speech model...");
